@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="66" height="66" viewBox="0 0 66 66">
+  <defs>
+    <radialGradient id="radial-gradient" cx="0.19" cy="1.137" r="1.227" gradientTransform="translate(0)" gradientUnits="objectBoundingBox">
+      <stop offset="0.179" stop-color="#36b649"/>
+      <stop offset="0.76" stop-color="#57c965"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient-2" cx="0.132" cy="1.162" r="1.032" gradientTransform="translate(0.033) scale(0.933 1)" gradientUnits="objectBoundingBox">
+      <stop offset="0.219" stop-color="#e7e7e7"/>
+      <stop offset="0.883" stop-color="#fff"/>
+    </radialGradient>
+  </defs>
+  <g id="Grupo_19" data-name="Grupo 19" transform="translate(-944.402 156.995)">
+    <path id="Caminho_95" data-name="Caminho 95" d="M977.4-156.995a32.846,32.846,0,0,0-33,32.689,32.3,32.3,0,0,0,4.627,16.691l-4.162,16.62,16.539-4.719a33.1,33.1,0,0,0,16,4.1,32.846,32.846,0,0,0,33-32.689A32.846,32.846,0,0,0,977.4-156.995Z" transform="translate(0)" fill="#fff"/>
+    <path id="Caminho_96" data-name="Caminho 96" d="M987.265-142.174a27.267,27.267,0,0,0-27.4,27.138A26.83,26.83,0,0,0,964.733-99.6l-2.407,9.614,9.417-2.686A27.444,27.444,0,0,0,987.265-87.9a27.267,27.267,0,0,0,27.4-27.138A27.267,27.267,0,0,0,987.265-142.174Z" transform="translate(-9.489 -9.147)" fill="url(#radial-gradient)"/>
+    <path id="Caminho_97" data-name="Caminho 97" d="M994.943-98.739c.381-.435.766-.868,1.147-1.3.643-.738,1.6-1.454,1.654-2.518a7.4,7.4,0,0,0-.683-2.963c-.234-.6-.474-1.191-.7-1.789a11.888,11.888,0,0,0-1.563-3.246,2.945,2.945,0,0,0-3.336-.516s-6.476,3.085-4.483,9.251a29.149,29.149,0,0,0,23.287,20.97s6.973.987,8.841-3.207a7.346,7.346,0,0,0,.608-3.164,2.622,2.622,0,0,0-1.54-2.04c-1.025-.582-1.934-1.128-3.1-1.7-1.012-.493-2.176-1.222-3.342-.9a4.945,4.945,0,0,0-2.045,1.618c-.755.795-1.525,1.575-2.288,2.363C1007.4-87.884,997.558-91.461,994.943-98.739Z" transform="translate(-25.885 -28.157)" fill="url(#radial-gradient-2)"/>
+  </g>
+</svg>
