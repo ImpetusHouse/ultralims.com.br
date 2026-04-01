@@ -47,6 +47,7 @@ use App\Http\Controllers\Admin\General\Portfolios\PortfolioController;
 use App\Http\Controllers\Admin\General\Portfolios\CategoryController as PortfolioCategoryController;
 use App\Http\Controllers\Admin\General\Products\ProductController;
 use App\Http\Controllers\Admin\General\Products\CategoryController as ProductCategoryController;
+use App\Http\Controllers\Admin\General\Products\FilterCategoryController as ProductFilterCategoryController;
 
 //Ultra Lims
 use App\Http\Controllers\Admin\UltraLims\BannerController;
@@ -563,6 +564,7 @@ Route::group([
             Route::get('/{type}/order/{id}', [ProductController::class, 'orderType'])->name('order.type');
             Route::post('/{type}/order/{id}', [ProductController::class, 'saveOrder'])->name('save.order');
             Route::resource('/categories', ProductCategoryController::class);
+            Route::resource('/filter-categories', ProductFilterCategoryController::class);
             Route::post('/get-slug', [ProductController::class, 'getSlug'])->name('get.slug');
 
             Route::get('/orders', [ProductController::class, 'orders'])->name('orders');

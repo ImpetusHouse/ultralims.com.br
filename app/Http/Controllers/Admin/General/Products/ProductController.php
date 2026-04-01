@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\General\Products;
 
 use App\Http\Controllers\Controller;
 use App\Models\General\Products\Category;
+use App\Models\General\Products\FilterCategory;
 use App\Models\General\Products\Product;
 use App\Models\UltraLims\UL_Product_User;
 use App\Models\UltraLims\Wishlist;
@@ -34,7 +35,8 @@ class ProductController extends Controller{
         ];
         $product = new Product();
         $categories = Category::orderBy('title')->get();
-        return view('admin.pages.general.products.form', compact('title', 'breadcrumbs', 'product', 'categories'));
+        $filterCategories = FilterCategory::orderBy('title')->get();
+        return view('admin.pages.general.products.form', compact('title', 'breadcrumbs', 'product', 'categories', 'filterCategories'));
     }
 
     public function store(Request $request){
@@ -50,7 +52,8 @@ class ProductController extends Controller{
         ];
         $product->url = asset(str_replace('public/', 'storage/', $product->photo));
         $categories = Category::orderBy('title')->get();
-        return view('admin.pages.general.products.form', compact('title', 'breadcrumbs', 'product', 'categories'));
+        $filterCategories = FilterCategory::orderBy('title')->get();
+        return view('admin.pages.general.products.form', compact('title', 'breadcrumbs', 'product', 'categories', 'filterCategories'));
     }
 
     public function update(Request $request, Product $product){
@@ -164,6 +167,12 @@ class ProductController extends Controller{
             } else {
                 $product->categories()->sync($request->categories);
             }
+
+            $filterCategoryIds = $request->input('filter_categories', []);
+            if (!is_array($filterCategoryIds)) {
+                $filterCategoryIds = [];
+            }
+            $product->filterCategories()->sync($filterCategoryIds);
 
             DB::commit();
             return response()->json(['success' => true, 'message' => 'Produto '.($action == 'store' ? 'salvo':'editado').' com sucesso']);

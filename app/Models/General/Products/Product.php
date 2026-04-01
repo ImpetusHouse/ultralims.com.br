@@ -18,4 +18,10 @@ class Product extends Model
     public function categories(){
         return $this->belongsToMany(Category::class, 'products_categories_pivot', 'product_id', 'category_id')->withTimestamps();
     }
+
+    public function filterCategories()
+    {
+        return $this->belongsToMany(FilterCategory::class, 'products_filter_categories_pivot', 'product_id', 'filter_category_id')
+            ->withTimestamps();
+    }
 }

@@ -246,6 +246,25 @@
                         Criar nova categoria
                     </a>
                     <!--end::Button-->
+                    <!--begin::Input group filter categories-->
+                    <label class="form-label mt-7">Categorias de filtros</label>
+                    <select class="form-select mb-2 filterCategorySelect" name="filter_categories[]" data-control="select2" data-placeholder="Selecione uma ou mais opções" multiple="multiple">
+                        <option></option>
+                        @foreach ($filterCategories as $filterCategory)
+                            <option value="{{ $filterCategory->id }}" {{ $product->filterCategories->pluck('id')->contains($filterCategory->id) ? 'selected':'' }}>{{ $filterCategory->title }}</option>
+                        @endforeach
+                    </select>
+                    <div class="text-muted fs-7 mb-7">Usado para filtrar produtos na vitrine (pode ser vazio).</div>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#makeFilterCategoriesModal" class="btn btn-light-primary btn-sm">
+                        <span class="svg-icon svg-icon-2">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect opacity="0.5" x="11" y="18" width="12" height="2" rx="1" transform="rotate(-90 11 18)" fill="currentColor" />
+                                <rect x="6" y="11" width="12" height="2" rx="1" fill="currentColor" />
+                            </svg>
+                        </span>
+                        Gerenciar categorias de filtros
+                    </a>
+                    <!--end::Input group filter categories-->
                 </div>
                 <!--end::Card body-->
             </div>
@@ -381,6 +400,52 @@
                                 <td style="text-align: right">
                                     <button type="button" class="btn btn-sm btn-icon mr-5 btn-light-primary" onclick="changeCategory({{$category->id}})"><i class="fas fa-pen m-0 p-0"></i></button>
                                     <button type="button" class="btn btn-sm btn-icon btn-light-danger" onclick="deleteCategory({{$category->id}})"><i class="fas fa-trash m-0 p-0"></i></button>
+                                </td>
+                            </tr>
+                        @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Concluído</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="makeFilterCategoriesModal" tabindex="-1" aria-labelledby="makeFilterCategoriesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="makeFilterCategoriesModalLabel">Categorias de filtros</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group mb-5">
+                        <label for="custom_filter_category_save" class="form-label">Nome</label>
+                        <div class="row">
+                            <div class="col-11 fv-row">
+                                <input type="text" class="form-control" id="custom_filter_category_save" data-id="store" name="filter_category_name">
+                                <span class="text-muted fs-8">Digite o nome e clique em salvar.</span>
+                            </div>
+                            <div class="col-1 fv-row">
+                                <button type="button" id="saveFilterCategory" class="btn btn-primary btn-icon">
+                                    <i class="fas fa-save"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="table table-striped table_filter_category" id="tableFilterCategories">
+                        <thead>
+                        <th>Categoria de filtros</th>
+                        <th style="text-align: right"><i class="fas fa-cog"></i></th>
+                        </thead>
+                        <tbody class="loadFilterItems">
+                        @foreach ($filterCategories as $filterCategory)
+                            <tr data-id="filter_category_{{ $filterCategory->id }}">
+                                <td>{{ $filterCategory->title }}</td>
+                                <td style="text-align: right">
+                                    <button type="button" class="btn btn-sm btn-icon mr-5 btn-light-primary" onclick="changeFilterCategory({{ $filterCategory->id }})"><i class="fas fa-pen m-0 p-0"></i></button>
+                                    <button type="button" class="btn btn-sm btn-icon btn-light-danger" onclick="deleteFilterCategory({{ $filterCategory->id }})"><i class="fas fa-trash m-0 p-0"></i></button>
                                 </td>
                             </tr>
                         @endforeach
@@ -866,6 +931,112 @@
                 select2.html('').select2({data: [{id: '', text: ''}]});
                 var returnArray = new Array();
                 returnArray.push({id: '', text: 'Sem categoria'});
+                $.each(data, function (key, value) {
+                    returnArray.push({id: value.id, text: value.title});
+                });
+                select2.html('').select2({'data': returnArray});
+            });
+        }
+    </script>
+    {{-- CRUD FILTER CATEGORIES --}}
+    <script>
+        var ModalFilterCategoryTypeSend = 'store';
+        var ModalFilterCategoryChange = null;
+        $('#saveFilterCategory').on("click", function(e){
+            var val = $('#custom_filter_category_save').val();
+            if(val.trim() != ''){
+                if(ModalFilterCategoryTypeSend == 'store'){
+                    $.ajax({
+                        method: "POST",
+                        url: "{{ route('admin.products.filter-categories.store') }}",
+                        data: {name: val},
+                        success: function(rtn){
+                            if(rtn.success){
+                                $('#custom_filter_category_save').val('');
+                                function makeFilterRow(){
+                                    return "<tr data-id='filter_category_"+rtn.id+"'><td>"+val+"</td><td style='text-align: right'><button type='button' class='btn btn-sm btn-icon btn-light-primary mr-5' onclick='changeFilterCategory("+rtn.id+")'><i class='fas fa-pen m-0 p-0'></i></button><button type='button' class='btn btn-sm btn-light-danger btn-icon' onclick='deleteFilterCategory("+rtn.id+")'><i class='fas fa-trash m-0 p-0'></i></button></td></tr>";
+                                }
+                                $('.loadFilterItems').append(makeFilterRow());
+                                fetchFilterSelect2();
+                            }else{
+                                Swal.fire('Erro!', rtn.message, 'error');
+                            }
+                        },
+                        error: function(){
+                            Swal.fire('Erro!', 'Erro ao processar requisição.', 'error');
+                        }
+                    })
+                }else if(ModalFilterCategoryTypeSend == 'update'){
+                    $.ajax({
+                        type: "PUT",
+                        url: "{{ route('admin.products.filter-categories.update', '_id_') }}".replace('_id_', ModalFilterCategoryChange),
+                        data: {name: val, id: ModalFilterCategoryChange, _method: 'PUT'},
+                        success: function(rtn){
+                            if(rtn.success){
+                                $('#custom_filter_category_save').val('');
+                                $('.loadFilterItems').find('[data-id="filter_category_'+ModalFilterCategoryChange+'"]').find('td:first').html(val);
+                                ModalFilterCategoryChange = null;
+                                ModalFilterCategoryTypeSend = 'store';
+                                fetchFilterSelect2();
+                            }else{
+                                Swal.fire('Erro!', rtn.message, 'error');
+                            }
+                        },
+                        error: function(){
+                            Swal.fire('Erro!', 'Erro ao processar requisição.', 'error');
+                        }
+                    })
+                }
+            }
+        });
+        function deleteFilterCategory(filter_category_id){
+            Swal.fire({
+                text: "Tem certeza que deseja excluir essa categoria de filtros?",
+                icon: "question",
+                showCancelButton: !0,
+                buttonsStyling: !1,
+                confirmButtonText: "Sim, excluir!",
+                cancelButtonText: "Não, cancelar",
+                customClass: {
+                    confirmButton: "btn fw-bold btn-danger",
+                    cancelButton: "btn fw-bold btn-primary"
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        method: "DELETE",
+                        url: "{{ route('admin.products.filter-categories.destroy', '_id_') }}".replace('_id_', filter_category_id),
+                        data: {id: filter_category_id},
+                        success: function(rtn){
+                            if(rtn.success){
+                                $('[data-id="filter_category_'+filter_category_id+'"]').fadeOut().remove();
+                                fetchFilterSelect2()
+                            }else{
+                                Swal.fire('Erro!', rtn.message, 'error')
+                            }
+                        },
+                        error: function(){
+                            Swal.fire('Falha!', 'Erro ao processar requisição.', 'error');
+                        }
+                    })
+                }
+            })
+        }
+        function changeFilterCategory(filter_category_id){
+            ModalFilterCategoryChange = filter_category_id;
+            ModalFilterCategoryTypeSend = 'update';
+            var name = $('[data-id="filter_category_'+filter_category_id+'"]').find('td:first').html();
+            $('#custom_filter_category_save').val(name);
+        }
+        function fetchFilterSelect2(){
+            var select2 = $('.filterCategorySelect');
+            $.ajax({
+                type: 'GET',
+                data: {ajaxJson: true},
+                url: '{{ route('admin.products.filter-categories.index') }}',
+            }).then(function (data) {
+                select2.html('').select2({data: [{id: '', text: ''}]});
+                var returnArray = new Array();
                 $.each(data, function (key, value) {
                     returnArray.push({id: value.id, text: value.title});
                 });
