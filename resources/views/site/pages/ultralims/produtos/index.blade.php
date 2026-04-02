@@ -27,23 +27,65 @@
         .wpp-button{
             display: none;
         }
+        .filtro-tab {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.75rem;
+            transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+            white-space: nowrap;
+        }
+        .filtro-tab--active {
+            color: #01aef0;
+            background-color: rgba(1, 174, 240, 0.1);
+            box-shadow: 0 1px 2px rgba(14, 19, 38, 0.06);
+        }
+        .filtro-tab:not(.filtro-tab--active) {
+            color: #9FADC2;
+        }
+        .filtro-tab:not(.filtro-tab--active):hover {
+            color: #01aef0;
+            background-color: rgba(1, 174, 240, 0.06);
+        }
     </style>
 @endpush
 @section('content')
     @include('site.inc.breadcrumb', ['breadcrumbs' => generateBreadcrumbs()])
     <section class="py-12 md:py-24">
         <div class="container px-4 mx-auto">
-            <div class="flex flex-col md:flex-row justify-between mb-14 items-center">
+            <div class="flex flex-col md:flex-row justify-between mb-6 md:mb-8 items-center">
                 <h2 class="text-center text-[#0E1326] block-title font-black font-heading w-full md:w-auto">
                      Plugins Ultra LIMS
                 </h2>
                 <div class="relative w-full mt-4 md:mt-0 md:w-80">
                     <img class="absolute transform -translate-y-1/2" src="{{ asset('images/blog/search.svg') }}" alt="" style="top: 50%; left: 1rem;">
                     <form method="GET" action="{{ route('ultralims.produtos') }}">
-                        <input name="search" value="{{ $_GET['search'] ?? '' }}" class="w-full py-3 pl-12 pr-4 text-gray-900 leading-tight placeholder-gray-500 border border-gray-200 rounded-lg shadow-xsm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50" type="text" placeholder="Procurar">
+                        @if(!empty($selectedFilterId))
+                            <input type="hidden" name="filtro" value="{{ $selectedFilterId }}">
+                        @endif
+                        <input name="search" value="{{ request('search', '') }}" class="w-full py-3 pl-12 pr-4 text-gray-900 leading-tight placeholder-gray-500 border border-gray-200 rounded-lg shadow-xsm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50" type="text" placeholder="Procurar">
                     </form>
                 </div>
             </div>
+            @if($filterCategories->isNotEmpty())
+                <nav class="w-full mb-10 md:mb-14 overflow-x-auto pb-1" aria-label="Filtros por categoria">
+                    <div class="flex flex-wrap gap-2 md:gap-3 min-w-min">
+                        <a href="{{ route('ultralims.produtos', request()->except('filtro', 'page')) }}"
+                           class="filtro-tab {{ $selectedFilterId === null ? 'filtro-tab--active' : '' }}">
+                            Todos
+                        </a>
+                        @foreach($filterCategories as $filterCategory)
+                            <a href="{{ route('ultralims.produtos', array_merge(request()->except('page'), ['filtro' => $filterCategory->id])) }}"
+                               class="filtro-tab {{ (int) $selectedFilterId === (int) $filterCategory->id ? 'filtro-tab--active' : '' }}">
+                                {{ $filterCategory->title }}
+                            </a>
+                        @endforeach
+                    </div>
+                </nav>
+            @endif
             <div class="flex flex-wrap -mx-4 -mb-10 products-container">
                 @include('site.pages.ultralims.produtos.produto', ['products' => $products])
             </div>

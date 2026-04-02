@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Site\UltraLIMS;
 use App\Http\Controllers\Controller;
 use App\Jobs\SendUserNotification;
 use App\Models\General\Events\Event;
+use App\Models\General\Products\FilterCategory;
 use App\Models\General\Products\Product;
 use App\Models\Pages\Page;
 use App\Models\UltraLims\Articles\Article;
@@ -329,14 +330,31 @@ class UltraLimsController extends Controller{
     }
 
     public function produtos(Request $request){
-        if (isset($_GET['search'])){
-            $search = $_GET['search'];
-            $products = Product::where('status', true)->where(function ($query) use ($search) {
-                $query->where('title', 'LIKE', '%'.$search.'%')->orWhere('description', 'LIKE', '%'.$search.'%')->orWhere('benefits', 'LIKE', '%'.$search.'%');
-            })->orderBy('display_order')->paginate(8);
-        }else{
-            $products = Product::where('status', true)->orderBy('display_order')->paginate(8);
+        $filterCategories = FilterCategory::orderBy('title')->get();
+
+        $query = Product::query()->where('status', true);
+
+        if ($request->filled('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', '%'.$search.'%')
+                    ->orWhere('description', 'LIKE', '%'.$search.'%')
+                    ->orWhere('benefits', 'LIKE', '%'.$search.'%');
+            });
         }
+
+        $selectedFilterId = null;
+        if ($request->filled('filtro')) {
+            $filterId = (int) $request->input('filtro');
+            if ($filterCategories->contains('id', $filterId)) {
+                $selectedFilterId = $filterId;
+                $query->whereHas('filterCategories', function ($q) use ($filterId) {
+                    $q->whereKey($filterId);
+                });
+            }
+        }
+
+        $products = $query->orderBy('display_order')->paginate(8)->withQueryString();
 
         if ($request->ajax()) {
             return view('site.pages.ultralims.produtos.produto', compact('products'))->render();
@@ -353,7 +371,7 @@ class UltraLimsController extends Controller{
         $page = new Page();
         $page->menu_id = 2;
 
-        return view('site.pages.ultralims.produtos.index', compact( 'products', 'page'));
+        return view('site.pages.ultralims.produtos.index', compact('products', 'page', 'filterCategories', 'selectedFilterId'));
     }
 
     public function produto($slug){
@@ -837,7 +855,7 @@ class UltraLimsController extends Controller{
     }
 
     public function login($id)
-    {
+    {   
         $id = Hashids::decode($id);
         $user = UL_User::where('id', $id)->first(); // Pega o usuário com base no ID do cookie
         if ($user) {
